@@ -1,3 +1,4 @@
+global strcpy
 global input
 global print
 global strlen
@@ -9,6 +10,17 @@ __jlib_longtostringbuf2 resb 128
 __jlib_longtostringptr resb 8
 section .text
 
+strcpy: ; void strcpy(char*, char*);
+	mov rdx, 0
+	mov dl, byte [rsi]
+	mov byte [rdi], dl
+	cmp dl, 0
+	je __jlib_strcpyquit
+	inc rdi
+	inc rsi
+	jmp strcpy
+__jlib_strcpyquit:
+	ret
 strcmp: ; long strcmp(char*, char*); returns 1 if the two null-terminates strings are the same, 0 if not.
     mov dl, byte [rdi]
     cmp dl, byte [rsi]
@@ -79,16 +91,13 @@ print: ; void print(char*); writes the null-terminated argument to stdout
 	ret
 
 strlen: ; long strlen(char*); returns the null-terminated argument's length
-	push rbx
-	mov rbx, 0
+	mov rax, 0
 __jlib_strlenloop:
+	cmp byte [rdi], 0
+	je __jlib_strlenquit
 	inc rdi
-	inc rbx
-	mov cl, [rdi]
-	cmp cl, 0
-	jne __jlib_strlenloop
-	mov rax, rbx
-	pop rbx
+	inc rax
+	jmp __jlib_strlenloop
+__jlib_strlenquit:
 	ret
-
-
+	
